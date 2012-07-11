@@ -10,7 +10,7 @@ import pl.delusion.chess.ui.GameUI;
 public class Chess extends Application {
     
     private static final int WIDTH = 725;
-    private static final int HEIGHT = 500;
+    private static final int HEIGHT = 530;
 
     @Override
     public void start(Stage stage) throws Exception {
