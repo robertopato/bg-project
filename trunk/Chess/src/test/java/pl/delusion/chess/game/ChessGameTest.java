@@ -9,11 +9,15 @@ public class ChessGameTest {
     
     private ChessGame chessGame;
     private Board board;
+    private PlayerChangedListener playerChangedListener;
     
     @BeforeMethod
     public void beforeMethod() {
         board = mock(Board.class);
+        playerChangedListener = mock(PlayerChangedListener.class);
+        
         chessGame = new ChessGame(board);
+        chessGame.addPlayerChangedListener(playerChangedListener);
     }
     
     @Test
@@ -142,6 +146,17 @@ public class ChessGameTest {
         
         // then
         assert result == piece;
+    }
+    
+    @Test
+    public void sendsPlayerChangedEventsAfterMove() throws IllegalMoveException {
+        // given
+        
+        // when
+        chessGame.move(FROM_X, FROM_Y, TO_X, TO_Y);
+        
+        // then
+        verify(playerChangedListener).playerChanged(Direction.GOING_UP);
     }
     
 }

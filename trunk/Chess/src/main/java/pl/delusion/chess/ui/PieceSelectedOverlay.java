@@ -60,9 +60,11 @@ public class PieceSelectedOverlay {
         for (Move move : moves) {
             LayeredGroup group = boardUI.getBoardSquares()[move.getX()][move.getY()];
 
-            String imageSource = "img/selected.png";
+            Piece pieceAt = pieceLocator.getPiece(move.getX(), move.getY());
+            
+            String imageSource = pieceAt != null ? "img/fire.png" : "img/selected.png";
             ImageView view = new ImageView(ImageHelper.getImage(imageSource));
-
+            
             group.putChild(SELECTED_KEY, view);
             overlayedGroups.add(group);
         }

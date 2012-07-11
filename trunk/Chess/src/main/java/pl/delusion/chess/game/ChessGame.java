@@ -1,11 +1,18 @@
 package pl.delusion.chess.game;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class ChessGame {
+    
+    public static final Direction DEFAULT_DIRECTION = Direction.GOING_DOWN;
     
     private boolean started = false;
     
     private Board board;
-    private Direction currentPlayer = Direction.GOING_DOWN;
+    private Direction currentPlayer = DEFAULT_DIRECTION;
+            
+    private List<PlayerChangedListener> playerChangedListeners = new ArrayList<PlayerChangedListener>();
 
     public ChessGame(Board board) {
         this.board = board;
@@ -31,6 +38,10 @@ public class ChessGame {
         Piece result = board.move(fromX, fromY, toX, toY);
         currentPlayer = (currentPlayer == Direction.GOING_DOWN ? Direction.GOING_UP : Direction.GOING_DOWN);
         
+        for(PlayerChangedListener playerChangedListener : playerChangedListeners) {
+            playerChangedListener.playerChanged(currentPlayer);
+        }
+        
         return result;
     }
 
@@ -44,6 +55,10 @@ public class ChessGame {
 
     public Board getBoard() {
         return board;
+    }
+    
+    public void addPlayerChangedListener(PlayerChangedListener playerChangedListener) {
+        this.playerChangedListeners.add(playerChangedListener);
     }
 
     void setCurrentPlayer(Direction currentPlayer) {

@@ -1,23 +1,30 @@
 package pl.delusion.chess.ui;
 
+import java.util.Collections;
 import java.util.EnumMap;
 import java.util.Map;
+import javafx.scene.Node;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.VBox;
 import pl.delusion.chess.game.*;
 import pl.delusion.chess.ui.UsedPiecesPane.Orientation;
+import pl.delusion.chess.ui.component.CurrentPlayerIndicator;
 
-public class GameUI extends GridPane {
+public class GameUI extends VBox {
     
-    static final Map<Direction, PieceColor> COLOR_MAPPING 
-            = new EnumMap<Direction, PieceColor>(Direction.class);
+    public static final Map<Direction, PieceColor> COLOR_MAPPING;
     
     static {
-        COLOR_MAPPING.put(Direction.GOING_DOWN, PieceColor.BLACK);
-        COLOR_MAPPING.put(Direction.GOING_UP, PieceColor.WHITE);
+        Map<Direction, PieceColor> temporary = new EnumMap<Direction, PieceColor>(Direction.class);
+        temporary.put(Direction.GOING_DOWN, PieceColor.BLACK);
+        temporary.put(Direction.GOING_UP, PieceColor.WHITE);
+        
+        COLOR_MAPPING = Collections.unmodifiableMap(temporary);
     }
       
     private ChessGame chessGame = new ChessGame(new Board());
     
+    private CurrentPlayerIndicator currentPlayerIndicator;
     private BoardUI boardUI;
     private PiecesOverlay piecesOverlay;
     private UsedPiecesPane blackPane;
@@ -26,10 +33,18 @@ public class GameUI extends GridPane {
     public GameUI(int width, int height) {
         chessGame.start();
         
-        initUI(width, height);
+        getChildren().add(initTop(width, 30));
+        getChildren().add(initContents(width, height - 30));
+    }
+    
+    private Node initTop(int width, int height) {
+        currentPlayerIndicator = new CurrentPlayerIndicator(width, height);
+        return currentPlayerIndicator;
     }
 
-    private void initUI(int width, int height) {
+    private Node initContents(int width, int height) {
+        GridPane contents = new GridPane();
+        
         int boardSize = width * 2 / 3;
         
         if(boardSize != height) {
@@ -40,19 +55,24 @@ public class GameUI extends GridPane {
         int usedPiecesPaneHeight = height / 2;
         
         blackPane = new UsedPiecesPane(usedPiecesPaneWidth, usedPiecesPaneHeight, Direction.GOING_DOWN, Orientation.TOP);
-        add(blackPane, 0, 0);
+        contents.add(blackPane, 0, 0);
         
         boardUI = new BoardUI(boardSize, height, chessGame.getBoard().getSize());
-        add(boardUI, 1, 0);
+        contents.add(boardUI, 1, 0);
         
         whitePane = new UsedPiecesPane(usedPiecesPaneWidth, usedPiecesPaneHeight, Direction.GOING_UP, Orientation.BOTTOM);
-        add(whitePane, 2, 0);
+        contents.add(whitePane, 2, 0);
         
         piecesOverlay = new PiecesOverlay(boardUI, chessGame);
         piecesOverlay.redraw();
         
         piecesOverlay.addPieceRemovedFromBoardListener(blackPane);
         piecesOverlay.addPieceRemovedFromBoardListener(whitePane);
+        
+        chessGame.addPlayerChangedListener(currentPlayerIndicator);
+        currentPlayerIndicator.playerChanged(chessGame.getCurrentPlayer());
+        
+        return contents;
     }
     
 }
